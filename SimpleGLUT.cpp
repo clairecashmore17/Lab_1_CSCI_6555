@@ -123,7 +123,13 @@ int createVectorOfKeyFrames() {
 
 	while(inputFile.good()){
 		Keyframe temp;
-		inputFile >> temp.x >> temp.y >> temp.z >> temp.xR >> temp.yR >> temp.zR >> temp.wR;
+		if(rotation_type == "Q"){
+			inputFile >> temp.x >> temp.y >> temp.z >> temp.xR >> temp.yR >> temp.zR >> temp.wR;
+		}
+		else if (rotation_type == "E") {
+			inputFile >> temp.x >> temp.y >> temp.z >> temp.xR >> temp.yR >> temp.zR;
+		}
+		
 		keyFrames.push_back(temp);
 	}
 
@@ -131,9 +137,9 @@ int createVectorOfKeyFrames() {
 	//cout << key_frame_count << endl;
 	//cout << frame_rate << endl;
 	//cout << keyFrames[0].x << ' ' << keyFrames[0].y << ' ' << keyFrames[0].z << ' ' << keyFrames[0].xR << ' ' << keyFrames[0].yR << ' ' << keyFrames[0].zR << ' ' << keyFrames[0].wR << endl;
-	/*for (Keyframe i : keyFrames) {
+	for (Keyframe i : keyFrames) {
 		cout << i.x << ' ' << i.y << ' ' << i.z << ' ' << i.xR << ' ' << i.yR << ' ' << i.zR << ' ' << i.wR << endl;
-	}*/
+	}
 	return 0;
 }
 
@@ -167,14 +173,14 @@ float CatmullInterpolation(float p0, float p1, float p2, float p3, float t) {
 float BSplineInterpolation(float p0, float p1,float p2, float p3,float t) {
 	float tCubed = t * t * t;
 	
-	double tSquared = t * t;
+	float tSquared = t * t;
 	
-	double mt3 = (1 - t) * (1 - t) * (1 - t);
+	float mt3 = (1 - t) * (1 - t) * (1 - t);
 
-	double f1 = mt3 / 6;
-	double f2 = ((3 * tCubed) - (6 * tSquared) + 4) / 6;
-	double f3 = ((-3 * tCubed) + (3 * tSquared) + (3 * t) + 1) / 6;
-	double f4 = mt3 / 6;
+	float f1 = mt3 / 6;
+	float f2 = ((3 * tCubed) - (6 * tSquared) + 4) / 6;
+	float f3 = ((-3 * tCubed) + (3 * tSquared) + (3 * t) + 1) / 6;
+	float f4 = mt3 / 6;
 
 	float x = p0 * f1 + p1 * f2 + p2 * f3 + p3 * f4;
 	return x;
@@ -314,7 +320,7 @@ void update( void ) {
 
 	
 }
-void interpolateQuaternionCat(string rotation_type) {
+void interpolateCat(string rotation_type) {
 
 	//Translation
 	float xinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].x, keyFrames[key_frame_index].x, keyFrames[key_frame_index + 1].x, keyFrames[key_frame_index + 2].x, 1);
@@ -331,9 +337,10 @@ void interpolateQuaternionCat(string rotation_type) {
 	float yRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].yR, keyFrames[key_frame_index].yR, keyFrames[key_frame_index + 1].yR, keyFrames[key_frame_index + 2].yR, 1);
 	float zRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].zR, keyFrames[key_frame_index].zR, keyFrames[key_frame_index + 1].zR, keyFrames[key_frame_index + 2].zR, 1);
 	if (rotation_type == "Q") {
+		
 		float wRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].wR, keyFrames[key_frame_index].wR, keyFrames[key_frame_index + 1].wR, keyFrames[key_frame_index + 2].wR, 1);
 		
-	//Rotation
+		//Rotation
 		q.x = xRinterpolated;
 		q.y = yRinterpolated;
 		q.z = zRinterpolated;
@@ -350,7 +357,7 @@ void interpolateQuaternionCat(string rotation_type) {
 
 	
 }
-void interpolateQuaternionBspline(string rotation_type) {
+void interpolateBspline(string rotation_type) {
 	//Translation
 	float xinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].x, keyFrames[key_frame_index].x, keyFrames[key_frame_index + 1].x, keyFrames[key_frame_index + 2].x, 1);
 	float yinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].y, keyFrames[key_frame_index].y, keyFrames[key_frame_index + 1].y, keyFrames[key_frame_index + 2].y, 1);
@@ -427,12 +434,12 @@ void render( void ) {
 	glLoadIdentity();
 	//glTranslatef (0.0, 0.0, -5);
 	//glRotated(g_angle, 0.0, 1.0, 0.0);
-	
+	cout << rotation_type << endl;
 	if (interpolate_type == "Catmull") {
-		interpolateQuaternionCat(rotation_type);
+		interpolateCat(rotation_type);
 	}
 	else if (interpolate_type == "Bspline") {
-		interpolateQuaternionBspline(rotation_type);
+		interpolateBspline(rotation_type);
 	}
 	
 

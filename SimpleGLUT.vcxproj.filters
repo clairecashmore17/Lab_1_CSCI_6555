@@ -34,5 +34,8 @@
     <Text Include="key_frames.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="key_frames_euler.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

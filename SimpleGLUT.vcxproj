@@ -153,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="key_frames.txt" />
+    <Text Include="key_frames_euler.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
