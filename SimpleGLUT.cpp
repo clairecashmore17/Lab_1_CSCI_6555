@@ -33,6 +33,9 @@ int key_frame_index = 1;
 // Frame rate to provide to timer
 int frame_rate= 0;
 
+// t_interpolate for the interpolation functions
+float t_interpolate = 0;
+
 string interpolate_type;
 string rotation_type;
 
@@ -95,7 +98,7 @@ GLfloat* m_ptr = g_matrix;
 
 // Function to read in file key_frames to load and interpolate.
 int createVectorOfKeyFrames() {
-	ifstream inputFile("key_frames.txt");
+	ifstream inputFile("key_frames_euler.txt");
 
 	if (!inputFile.is_open()) {
 		cerr << "Error opening file!" << endl;
@@ -137,9 +140,9 @@ int createVectorOfKeyFrames() {
 	//cout << key_frame_count << endl;
 	//cout << frame_rate << endl;
 	//cout << keyFrames[0].x << ' ' << keyFrames[0].y << ' ' << keyFrames[0].z << ' ' << keyFrames[0].xR << ' ' << keyFrames[0].yR << ' ' << keyFrames[0].zR << ' ' << keyFrames[0].wR << endl;
-	for (Keyframe i : keyFrames) {
+	/*for (Keyframe i : keyFrames) {
 		cout << i.x << ' ' << i.y << ' ' << i.z << ' ' << i.xR << ' ' << i.yR << ' ' << i.zR << ' ' << i.wR << endl;
-	}
+	}*/
 	return 0;
 }
 
@@ -294,7 +297,74 @@ Quaternion MatrixToQuaternion(GLfloat m[16]) {
 }
 
 
+void interpolateCat(string rotation_type) {
 
+	//Translation
+	float xinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].x, keyFrames[key_frame_index].x, keyFrames[key_frame_index + 1].x, keyFrames[key_frame_index + 2].x, t_interpolate);
+	float yinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].y, keyFrames[key_frame_index].y, keyFrames[key_frame_index + 1].y, keyFrames[key_frame_index + 2].y, t_interpolate);
+	float zinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].z, keyFrames[key_frame_index].z, keyFrames[key_frame_index + 1].z, keyFrames[key_frame_index + 2].z, t_interpolate);
+
+	t.x = xinterpolated;
+	t.y = yinterpolated;
+	t.z = zinterpolated;
+
+
+	//Rotation
+	float xRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].xR, keyFrames[key_frame_index].xR, keyFrames[key_frame_index + 1].xR, keyFrames[key_frame_index + 2].xR, t_interpolate);
+	float yRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].yR, keyFrames[key_frame_index].yR, keyFrames[key_frame_index + 1].yR, keyFrames[key_frame_index + 2].yR, t_interpolate);
+	float zRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].zR, keyFrames[key_frame_index].zR, keyFrames[key_frame_index + 1].zR, keyFrames[key_frame_index + 2].zR, t_interpolate);
+	if (rotation_type == "Q") {
+
+		float wRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].wR, keyFrames[key_frame_index].wR, keyFrames[key_frame_index + 1].wR, keyFrames[key_frame_index + 2].wR, t_interpolate);
+
+		//Rotation
+		q.x = xRinterpolated;
+		q.y = yRinterpolated;
+		q.z = zRinterpolated;
+		q.w = wRinterpolated;
+
+	}
+	else if (rotation_type == "E") {
+		e.roll = xRinterpolated;
+		e.pitch = yRinterpolated;
+		e.yaw = zRinterpolated;
+	}
+
+
+
+
+}
+void interpolateBspline(string rotation_type) {
+	//Translation
+	float xinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].x, keyFrames[key_frame_index].x, keyFrames[key_frame_index + 1].x, keyFrames[key_frame_index + 2].x, t_interpolate);
+	float yinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].y, keyFrames[key_frame_index].y, keyFrames[key_frame_index + 1].y, keyFrames[key_frame_index + 2].y, t_interpolate);
+	float zinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].z, keyFrames[key_frame_index].z, keyFrames[key_frame_index + 1].z, keyFrames[key_frame_index + 2].z, t_interpolate);
+
+	t.x = xinterpolated;
+	t.y = yinterpolated;
+	t.z = zinterpolated;
+
+
+	//Rotation
+	float xRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].xR, keyFrames[key_frame_index].xR, keyFrames[key_frame_index + 1].xR, keyFrames[key_frame_index + 2].xR, t_interpolate);
+	float yRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].yR, keyFrames[key_frame_index].yR, keyFrames[key_frame_index + 1].yR, keyFrames[key_frame_index + 2].yR, t_interpolate);
+	float zRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].zR, keyFrames[key_frame_index].zR, keyFrames[key_frame_index + 1].zR, keyFrames[key_frame_index + 2].zR, t_interpolate);
+	if (rotation_type == "Q") {
+		float wRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].wR, keyFrames[key_frame_index].wR, keyFrames[key_frame_index + 1].wR, keyFrames[key_frame_index + 2].wR, t_interpolate);
+
+		//Rotation
+		q.x = xRinterpolated;
+		q.y = yRinterpolated;
+		q.z = zRinterpolated;
+		q.w = wRinterpolated;
+
+	}
+	else if (rotation_type == "E") {
+		e.roll = xRinterpolated;
+		e.pitch = yRinterpolated;
+		e.yaw = zRinterpolated;
+	}
+}
 
 //================================
 // init
@@ -310,84 +380,45 @@ void init( void ) {
 void update( void ) {
 	// do something before rendering...
 	
+	// If we have not reach end of t for interpolation...
+	if (t_interpolate < 1) {
+		if (interpolate_type == "Catmull") {
+			//create interpolated point
+			interpolateCat(rotation_type);
+		}
+		else if (interpolate_type == "Bspline") {
+			//create interpolated point
+			interpolateBspline(rotation_type);
+		}
+
+
+		if (rotation_type == "Q") {
+			// Set current m_ptr matrix to be interpolated one.
+			m_ptr = QuaternionToMatrix(t, q, g_matrix);
+		}
+		else if (rotation_type == "E") {
+			// Set current m_ptr matrix to be interpolated one.
+			m_ptr = EulerToMatrix(e.roll, e.pitch, e.yaw, g_matrix, t);
+		}
+		// Move t up for next interoplation
+		t_interpolate += .1;
+	}
+	else if (t_interpolate >= 1) {
 		// move onto next key_frame
 		key_frame_index++;
+		// set inerpolation back to 0
+		t_interpolate = 0;
+	}
+	
 		/*cout << key_frame_index << endl; */
 	//Keep spinning around keyFrames
 	if (key_frame_index >= num_key_frames - 1) {
 		key_frame_index = 1;
 	}
-
+	
 	
 }
-void interpolateCat(string rotation_type) {
 
-	//Translation
-	float xinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].x, keyFrames[key_frame_index].x, keyFrames[key_frame_index + 1].x, keyFrames[key_frame_index + 2].x, 1);
-	float yinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].y, keyFrames[key_frame_index].y, keyFrames[key_frame_index + 1].y, keyFrames[key_frame_index + 2].y, 1);
-	float zinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].z, keyFrames[key_frame_index].z, keyFrames[key_frame_index + 1].z, keyFrames[key_frame_index + 2].z, 1);
-	
-	t.x = xinterpolated;
-	t.y = yinterpolated;
-	t.z = zinterpolated;
-
-
-	//Rotation
-	float xRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].xR, keyFrames[key_frame_index].xR, keyFrames[key_frame_index + 1].xR, keyFrames[key_frame_index + 2].xR, 1);
-	float yRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].yR, keyFrames[key_frame_index].yR, keyFrames[key_frame_index + 1].yR, keyFrames[key_frame_index + 2].yR, 1);
-	float zRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].zR, keyFrames[key_frame_index].zR, keyFrames[key_frame_index + 1].zR, keyFrames[key_frame_index + 2].zR, 1);
-	if (rotation_type == "Q") {
-		
-		float wRinterpolated = CatmullInterpolation(keyFrames[key_frame_index - 1].wR, keyFrames[key_frame_index].wR, keyFrames[key_frame_index + 1].wR, keyFrames[key_frame_index + 2].wR, 1);
-		
-		//Rotation
-		q.x = xRinterpolated;
-		q.y = yRinterpolated;
-		q.z = zRinterpolated;
-		q.w = wRinterpolated;
-
-	}
-	else if (rotation_type == "E") {
-		e.roll = xRinterpolated;
-		e.pitch = yRinterpolated;
-		e.yaw = zRinterpolated;
-	}
-	
-
-
-	
-}
-void interpolateBspline(string rotation_type) {
-	//Translation
-	float xinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].x, keyFrames[key_frame_index].x, keyFrames[key_frame_index + 1].x, keyFrames[key_frame_index + 2].x, 1);
-	float yinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].y, keyFrames[key_frame_index].y, keyFrames[key_frame_index + 1].y, keyFrames[key_frame_index + 2].y, 1);
-	float zinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].z, keyFrames[key_frame_index].z, keyFrames[key_frame_index + 1].z, keyFrames[key_frame_index + 2].z, 1);
-
-	t.x = xinterpolated;
-	t.y = yinterpolated;
-	t.z = zinterpolated;
-
-
-	//Rotation
-	float xRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].xR, keyFrames[key_frame_index].xR, keyFrames[key_frame_index + 1].xR, keyFrames[key_frame_index + 2].xR, 1);
-	float yRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].yR, keyFrames[key_frame_index].yR, keyFrames[key_frame_index + 1].yR, keyFrames[key_frame_index + 2].yR, 1);
-	float zRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].zR, keyFrames[key_frame_index].zR, keyFrames[key_frame_index + 1].zR, keyFrames[key_frame_index + 2].zR, 1);
-	if (rotation_type == "Q") {
-		float wRinterpolated = BSplineInterpolation(keyFrames[key_frame_index - 1].wR, keyFrames[key_frame_index].wR, keyFrames[key_frame_index + 1].wR, keyFrames[key_frame_index + 2].wR, 1);
-
-		//Rotation
-		q.x = xRinterpolated;
-		q.y = yRinterpolated;
-		q.z = zRinterpolated;
-		q.w = wRinterpolated;
-
-	}
-	else if (rotation_type == "E") {
-		e.roll = xRinterpolated;
-		e.pitch = yRinterpolated;
-		e.yaw = zRinterpolated;
-	}
-}
 //================================
 // render
 //================================
@@ -432,25 +463,12 @@ void render( void ) {
 	// modelview matrix
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
-	//glTranslatef (0.0, 0.0, -5);
-	//glRotated(g_angle, 0.0, 1.0, 0.0);
-	cout << rotation_type << endl;
-	if (interpolate_type == "Catmull") {
-		interpolateCat(rotation_type);
-	}
-	else if (interpolate_type == "Bspline") {
-		interpolateBspline(rotation_type);
-	}
+	
 	
 
-	if (rotation_type == "Q") {
-		m_ptr = QuaternionToMatrix(t, q, g_matrix);
-	}
-	else if (rotation_type == "E") {
-		m_ptr = EulerToMatrix(e.roll,e.pitch,e.yaw, g_matrix, t);
-	}
+
 	
-	cout << m_ptr[0] << ", " << m_ptr[1] << ", " << m_ptr[2] << ", " << m_ptr[3] << '\n' << m_ptr[4] << ", " << m_ptr[5] << ", " << m_ptr[6] << ", " << m_ptr[7] << '\n' << m_ptr[8] << ", " << m_ptr[9] << ", " << m_ptr[10] << ", " << m_ptr[11] << '\n' << m_ptr[12] << ", " << m_ptr[13] << ", " << m_ptr[14] << ", " << m_ptr[15] << endl;
+	//cout << m_ptr[0] << ", " << m_ptr[1] << ", " << m_ptr[2] << ", " << m_ptr[3] << '\n' << m_ptr[4] << ", " << m_ptr[5] << ", " << m_ptr[6] << ", " << m_ptr[7] << '\n' << m_ptr[8] << ", " << m_ptr[9] << ", " << m_ptr[10] << ", " << m_ptr[11] << '\n' << m_ptr[12] << ", " << m_ptr[13] << ", " << m_ptr[14] << ", " << m_ptr[15] << endl;
 
 	// Multiply current matrix by next matrix found in interpolation
 	glMultMatrixf(m_ptr);
@@ -460,6 +478,7 @@ void render( void ) {
 	
 	// render objects
 	glutSolidTeapot(1.0);
+	
 
 	// disable lighting
 	glDisable(GL_LIGHT0);
@@ -467,6 +486,14 @@ void render( void ) {
 
 	// swap back and front buffers
 	glutSwapBuffers();
+	//int* buffer = new int[600 * 600 * 3];
+	//glReadPixels(100,100,600,600,GL_RGB, GL_UNSIGNED_BYTE,buffer);
+	//FILE* out = fopen("tga_file.tga", "w");
+	//short  TGAhead[] = { 0, 2, 0, 0, 0, 0, 600, 600, 24 };
+	//fwrite(&TGAhead, sizeof(TGAhead), 1, out);
+	//fwrite(buffer, 3 * 600 * 600, 1, out);
+	//fclose(out);
+
 }
 
 //================================
@@ -519,7 +546,7 @@ int main( int argc, char** argv ) {
 	// create opengL window
 	glutInit( &argc, argv );
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB |GLUT_DEPTH );
-	glutInitWindowSize( 600, 600 ); 
+	glutInitWindowSize( 800, 900 ); 
 	glutInitWindowPosition( 100, 100 );
 	glutCreateWindow( argv[0] );
 

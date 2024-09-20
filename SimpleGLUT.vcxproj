@@ -155,6 +155,9 @@
     <Text Include="key_frames.txt" />
     <Text Include="key_frames_euler.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="tga_file.tga" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
