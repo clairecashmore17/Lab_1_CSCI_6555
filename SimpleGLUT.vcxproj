@@ -154,6 +154,7 @@
   <ItemGroup>
     <Text Include="key_frames.txt" />
     <Text Include="key_frames_euler.txt" />
+    <Text Include="key_frames_left_leg.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="tga_file.tga" />
