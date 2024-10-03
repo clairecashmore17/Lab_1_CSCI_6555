@@ -37,6 +37,9 @@
     <Text Include="key_frames_euler.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="key_frames_left_leg.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <Image Include="tga_file.tga">
