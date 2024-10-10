@@ -326,12 +326,12 @@ Quaternion MatrixToQuaternion(GLfloat m[16]) {
 
 void moveLeftLeg() {
 	//Translate the y coordinate by 1
-	g_left_leg[13] = m_ptr[13] - 1;
+	g_left_leg[13] = m_ptr[13] - 1.5;
 	g_left_leg[14] = m_ptr[11] -1;
 
 	g_left_leg[4] = sin(g_angle/2);
 
-	g_left_leg[13] = m_ptr[13] -1 ;
+	g_left_leg[13] = m_ptr[13] -1.5;
 	// Multiply this matrix by rotation matrix
 	/*
 		|	1	0	0	0	|		|	1		0		0		0	|
@@ -351,12 +351,12 @@ void moveLeftLeg() {
 
 void moveRightLeg() {
 	//Translate the y coordinate by 1
-	g_right_leg[13] = m_ptr[13] - 1;
+	g_right_leg[13] = m_ptr[13] - 1.5;
 	g_right_leg[14] = m_ptr[11] + 1;
 
-	g_right_leg[4] = cos(g_angle/2);
+	g_right_leg[4] = -sin(g_angle/2);
 	
-	g_right_leg[13] = m_ptr[13] - 1;
+	g_right_leg[13] = m_ptr[13] - 1.5;
 	// Multiply this matrix by rotation matrix
 	/*
 		|	1	0	0	0	|		|	1		0		0		0	|
@@ -585,11 +585,14 @@ void render( void ) {
 
 	// modelview matrix
 	glMatrixMode( GL_MODELVIEW );
+
+	//Loads our identity matrix.
 	glLoadIdentity();
+
 	
 	
 
-
+	/******* BEGIN TRANSFORMS ********/
 	
 	//cout << m_ptr[0] << ", " << m_ptr[1] << ", " << m_ptr[2] << ", " << m_ptr[3] << '\n' << m_ptr[4] << ", " << m_ptr[5] << ", " << m_ptr[6] << ", " << m_ptr[7] << '\n' << m_ptr[8] << ", " << m_ptr[9] << ", " << m_ptr[10] << ", " << m_ptr[11] << '\n' << m_ptr[12] << ", " << m_ptr[13] << ", " << m_ptr[14] << ", " << m_ptr[15] << endl;
 
@@ -597,36 +600,33 @@ void render( void ) {
 	glMultMatrixf(m_ptr);
 		
 	
-	
-	
-	// render objects
-	
-
+	/******** render objects ******/
 	//Render Head
 	glutSolidSphere(1, 20, 20);
 	glMultMatrixf(head_ptr);
 	
 	//Render body
-	glScalef(1, body_length, 1);
-	glutSolidCube(1.0);
-	
-	
+	/*glScalef(1, body_length, 1);
+	glutSolidCube(1.0);*/
+	glutSolidSphere(1.5, 20, 20);
+	// Push matrix to use with other body parts. (Saving the matrix to top of stack.)
 	glPushMatrix();
 	
 	
 	
 	// Render Left leg
-
 	glMultMatrixf(m_left_leg);
 	glutSolidCube(1.0);
-	
+
+	//Pop to go back to body matrix
 	glPopMatrix();
 	
 	
 	// Render Right Leg
-	
 	glMultMatrixf(m_right_leg);
 	glutSolidCube(1.0);
+
+	/********** End Transforms *****************/
 
 	// disable lighting
 	glDisable(GL_LIGHT0);
