@@ -1,5 +1,5 @@
 ========================================================================
-       CONSOLE APPLICATION : SimpleGLUT
+       CONSOLE APPLICATION : Lab_03 Physics
 ========================================================================
 
 
@@ -16,6 +16,12 @@ SimpleGLUT.dsp
 SimpleGLUT.cpp
     This is the main application source file.
 
+InputFile.txt
+    This file contains the details of the objects (cubes) including their starting velocity, positions, mass, and force to start. Changing these metrics should change the outcome of the animation.
+
+/////////////////////////////////////////////////////////////////////////////
+How to Run:
+Simply download the files
 
 /////////////////////////////////////////////////////////////////////////////
 Other standard files:
